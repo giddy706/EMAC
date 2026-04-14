@@ -6,5 +6,14 @@
     "loanAmount": "10000",
     "paymentStatus": "pending",
     "createdAt": "2026-04-14T19:55:35.841Z"
+  },
+  {
+    "name": "giddy",
+    "email": "nderitugideon802@gmail.com",
+    "password": "giddy@1234",
+    "loanAmount": "10000",
+    "paymentStatus": "awaiting",
+    "createdAt": "2026-04-14T21:48:48.231Z",
+    "checkoutRequestId": "ws_CO_15042026005644880797758040"
   }
 ]
