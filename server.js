@@ -65,7 +65,8 @@ app.post('/megapay/pay', async (req, res) => {
         api_key: process.env.MEGAPAY_API_KEY,
         email: process.env.MEGAPAY_EMAIL,
         amount: amount || 1300,
-        msisdn: phone
+        msisdn: phone,
+        reference: `EMAC-${Date.now()}`
       },
       {
         headers: { 'Content-Type': 'application/json' }
@@ -85,8 +86,11 @@ app.post('/megapay/pay', async (req, res) => {
 
     res.json({ success: true, data: response.data });
   } catch (err) {
+    const errorMsg = err.response && err.response.data && err.response.data.errorMessage 
+      ? err.response.data.errorMessage 
+      : err.message;
     console.error('MegaPay Error:', err.response ? err.response.data : err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: errorMsg });
   }
 });
 

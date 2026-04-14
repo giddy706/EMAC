@@ -262,17 +262,30 @@
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending STK Push...';
 
     try {
-      const res = await fetch('http://localhost:5000/megapay/pay', {
+      // Use relative URL when served by Express (Render or localhost:5000)
+      // Only use absolute URL when opened as file://
+      const BASE_URL = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+      const res = await fetch(BASE_URL + '/megapay/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, amount: 1300, userEmail })
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || 'Payment initiation failed.');
+        // Parse error response — could be JSON or HTML
+        let errMsg = 'Payment initiation failed.';
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType && contentType.includes('application/json')) {
+          const errData = await res.json();
+          errMsg = errData.error || errData.message || errMsg;
+        } else {
+          const errText = await res.text();
+          errMsg = `Server error (${res.status}). Ensure server is running on port 5000. \n${errText.substring(0, 100)}`;
+        }
+        throw new Error(errMsg);
       }
+      
+      const data = await res.json();
 
       // Show pending screen
       document.getElementById('phone-display').textContent = '+' + phone;
@@ -315,7 +328,8 @@
           return;
         }
 
-        const res = await fetch(`http://localhost:5000/megapay/status/${encodeURIComponent(email)}`);
+        const BASE_URL = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+        const res = await fetch(`${BASE_URL}/megapay/status/${encodeURIComponent(email)}`);
         const data = await res.json();
 
         if (data.paymentStatus === 'paid') {
