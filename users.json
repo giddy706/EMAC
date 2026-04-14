@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Gideon Nderitu",
+    "email": "nderitugideon73@gmail.com",
+    "password": "giddy1234",
+    "loanAmount": "10000",
+    "paymentStatus": "pending",
+    "createdAt": "2026-04-14T19:55:35.841Z"
+  }
+]

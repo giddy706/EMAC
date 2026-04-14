@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>EMAC - Complete Registration Payment</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --teal:#00A896; --teal-dark:#007A6C; --teal-light:#E0F5F3;
+      --gold:#F5A623; --text-dark:#1A2340; --text-mid:#4A5568; --text-light:#718096;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:#f5f7fa; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .page { width:100%; max-width:460px; }
+
+    /* Main card */
+    .pay-card {
+      background:#fff; border-radius:24px; padding:36px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.08);
+    }
+    .back-link { color:var(--text-light); font-size:14px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-bottom:24px; transition:color 0.2s; }
+    .back-link:hover { color:var(--teal); }
+
+    /* Header */
+    .pay-card h1 { font-size:26px; font-weight:900; color:var(--text-dark); margin-bottom:4px; }
+    .pay-card .sub { font-size:14px; color:var(--text-light); margin-bottom:28px; line-height:1.6; }
+
+    /* Amount box */
+    .amount-box {
+      background:linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      border-radius:16px; padding:24px; text-align:center; margin-bottom:28px; color:#fff;
+    }
+    .amount-box .lbl { font-size:11px; opacity:0.75; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+    .amount-box .amt { font-size:44px; font-weight:900; }
+    .amount-box .note { font-size:12px; opacity:0.7; margin-top:8px; }
+
+    /* Steps pills */
+    .steps-row { display:flex; align-items:center; gap:8px; margin-bottom:28px; }
+    .step-pill { display:flex; align-items:center; gap:6px; background:var(--teal-light); color:var(--teal); padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; }
+    .step-divider { flex:1; height:1px; background:#eef0f5; }
+    .step-pill.inactive { background:#f5f5f5; color:var(--text-light); }
+
+    /* Phone field */
+    .field-label { font-size:13px; font-weight:600; color:var(--text-mid); margin-bottom:8px; display:block; }
+    .phone-wrap { display:flex; gap:10px; }
+    .phone-prefix {
+      height:52px; min-width:70px; background:#f5f7fa; border:2px solid #eef0f5;
+      border-radius:12px; display:flex; align-items:center; justify-content:center;
+      font-size:14px; font-weight:700; color:var(--text-dark); flex-shrink:0;
+    }
+    .field-input {
+      flex:1; height:52px; border:2px solid #eef0f5; border-radius:12px; padding:0 16px;
+      font-family:'Inter',sans-serif; font-size:15px; color:var(--text-dark);
+      background:#fafbfc; outline:none; transition:border 0.2s;
+    }
+    .field-input:focus { border-color:var(--teal); background:#fff; }
+
+    /* Info block */
+    .info-block { background:#f8faff; border:1px solid #e8f4f3; border-radius:12px; padding:14px 16px; margin-top:18px; display:flex; align-items:flex-start; gap:12px; }
+    .info-block i { color:var(--teal); margin-top:2px; }
+    .info-block p { font-size:13px; color:var(--text-mid); margin:0; line-height:1.6; }
+
+    /* Pay button */
+    .btn-pay {
+      width:100%; background:var(--teal); color:#fff; border:none; border-radius:14px;
+      height:56px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif;
+      transition:background 0.2s, transform 0.2s; margin-top:22px;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .btn-pay:hover:not(:disabled) { background:var(--teal-dark); transform:translateY(-2px); }
+    .btn-pay:disabled { background:#aaa; cursor:not-allowed; transform:none; }
+
+    /* Security */
+    .security-row { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px; font-size:12px; color:var(--text-light); }
+    .disclaimer { text-align:center; font-size:12px; font-weight:700; color:#EF5350; margin-top:10px; }
+
+    /* Powered by */
+    .powered-by { text-align:center; margin-top:20px; font-size:11px; color:var(--text-light); }
+    .powered-by strong { color:var(--teal); }
+
+    /* ── Pending State ── */
+    .pending-card {
+      background:#fff; border-radius:24px; padding:44px 36px; text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.08); display:none;
+    }
+    .spinner-ring {
+      width:80px; height:80px; border-radius:50%;
+      border:5px solid var(--teal-light); border-top-color:var(--teal);
+      animation:spin 1s linear infinite; margin:0 auto 24px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .pending-card h2 { font-size:22px; font-weight:800; color:var(--text-dark); margin-bottom:10px; }
+    .pending-card p { font-size:14px; color:var(--text-mid); line-height:1.7; margin-bottom:20px; }
+    .phone-highlight { display:inline-block; background:var(--teal-light); color:var(--teal); font-weight:800; padding:4px 14px; border-radius:20px; font-size:15px; margin-bottom:16px; }
+    .countdown { font-size:12px; color:var(--text-light); margin-top:10px; }
+
+    /* ── Success State ── */
+    .success-card {
+      background:#fff; border-radius:24px; padding:50px 36px; text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.08); display:none;
+    }
+    .success-lines { margin:0 auto 28px; }
+    .success-line { height:8px; border-radius:8px; margin:10px auto; background:#f0f0f0; }
+    .success-check-wrap {
+      width:100px; height:100px; border-radius:50%; border:4px solid #4CAF50;
+      display:flex; align-items:center; justify-content:center; margin:0 auto 24px;
+      animation:popIn 0.5s ease-out;
+    }
+    @keyframes popIn { 0%{transform:scale(0.5);opacity:0} 80%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+    .success-card h2 { font-size:28px; font-weight:900; color:var(--text-dark); margin-bottom:12px; }
+    .success-card p { color:var(--text-mid); font-size:15px; line-height:1.7; max-width:300px; margin:0 auto 32px; }
+    .btn-home {
+      background:var(--text-dark); color:#fff; padding:16px 36px; border-radius:14px;
+      font-weight:700; font-size:15px; text-decoration:none; display:inline-block;
+      letter-spacing:1px; text-transform:uppercase; transition:background 0.2s;
+    }
+    .btn-home:hover { background:var(--teal); color:#fff; }
+
+    /* ── Failed State ── */
+    .failed-card {
+      background:#fff; border-radius:24px; padding:50px 36px; text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.08); display:none;
+    }
+    .fail-icon { width:80px; height:80px; border-radius:50%; border:4px solid #EF5350; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+    .fail-icon i { font-size:36px; color:#EF5350; }
+    .failed-card h2 { font-size:22px; font-weight:800; color:var(--text-dark); margin-bottom:10px; }
+    .failed-card p { font-size:14px; color:var(--text-mid); margin-bottom:24px; }
+    .btn-retry { background:var(--teal); color:#fff; padding:13px 30px; border-radius:14px; font-weight:700; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:14px; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── PAYMENT FORM ── -->
+  <div class="pay-card" id="view-pay">
+    <a href="dashboard.html" class="back-link"><i class="fas fa-chevron-left"></i> Back to Dashboard</a>
+
+    <!-- Steps -->
+    <div class="steps-row">
+      <div class="step-pill inactive"><i class="fas fa-check"></i> Registered</div>
+      <div class="step-divider"></div>
+      <div class="step-pill"><i class="fas fa-mobile-alt"></i> Pay via M-Pesa</div>
+      <div class="step-divider"></div>
+      <div class="step-pill inactive"><i class="fas fa-door-open"></i> Access</div>
+    </div>
+
+    <h1>Complete Registration</h1>
+    <p class="sub">Pay the one-time Loan Readiness & Financial Assessment fee via M-Pesa to unlock your loan packages.</p>
+
+    <!-- Amount box -->
+    <div class="amount-box">
+      <div class="lbl">Total Registration Fee</div>
+      <div class="amt">Ksh 1,300</div>
+      <div class="note">Loan Readiness &amp; Financial Assessment</div>
+    </div>
+
+    <!-- Phone input -->
+    <label class="field-label" for="phone-input">Your M-Pesa Phone Number</label>
+    <div class="phone-wrap">
+      <div class="phone-prefix">🇰🇪 +254</div>
+      <input class="field-input" id="phone-input" type="tel" placeholder="7XX XXX XXX" maxlength="9" />
+    </div>
+
+    <!-- Info -->
+    <div class="info-block">
+      <i class="fas fa-info-circle"></i>
+      <p>Enter your Safaricom M-Pesa number. An STK Push prompt will appear on your phone. Enter your M-Pesa PIN to confirm the payment of <strong>Ksh 1,300</strong>.</p>
+    </div>
+
+    <!-- Pay button -->
+    <button class="btn-pay" id="pay-btn" onclick="initiatePayment()">
+      <i class="fas fa-lock"></i> Pay Ksh 1,300 via M-Pesa
+    </button>
+
+    <div class="security-row">
+      <i class="fas fa-shield-alt" style="color:var(--teal)"></i>
+      Secured by MegaPay &amp; Safaricom M-Pesa
+    </div>
+    <div class="disclaimer">* Registration fee is non-refundable</div>
+
+    <div class="powered-by">Powered by <strong>MegaPay</strong></div>
+  </div>
+
+  <!-- ── PENDING (waiting for PIN) ── -->
+  <div class="pending-card" id="view-pending">
+    <div class="spinner-ring"></div>
+    <h2>Waiting for M-Pesa PIN...</h2>
+    <div class="phone-highlight" id="phone-display"></div>
+    <p>An M-Pesa prompt has been sent to your phone.<br>Please <strong>enter your PIN</strong> to complete the payment.</p>
+    <div class="countdown" id="countdown-text">Checking payment status...</div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="success-card" id="view-success">
+    <div class="success-lines">
+      <div class="success-line" style="width:55%"></div>
+      <div class="success-line" style="width:38%"></div>
+    </div>
+    <div class="success-check-wrap">
+      <i class="fas fa-check" style="font-size:40px;color:#4CAF50"></i>
+    </div>
+    <h2>Payment Done</h2>
+    <p>Your registration fee has been received. Your account is now active — your loan packages are unlocked!</p>
+    <a href="dashboard.html" class="btn-home">Back to Home</a>
+  </div>
+
+  <!-- ── FAILED ── -->
+  <div class="failed-card" id="view-failed">
+    <div class="fail-icon"><i class="fas fa-times"></i></div>
+    <h2>Payment Failed</h2>
+    <p id="fail-message">The payment was not completed. Please try again.</p>
+    <button class="btn-retry" onclick="showView('pay')">Try Again</button>
+  </div>
+
+</div>
+
+<script>
+  // ── View switcher ──
+  const views = ['pay','pending','success','failed'];
+  function showView(v) {
+    views.forEach(name => {
+      document.getElementById('view-' + name).style.display = name === v ? 'block' : 'none';
+    });
+  }
+
+  // Pre-fill phone if available in localStorage
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedPhone = localStorage.getItem('userPhone');
+    if (savedPhone) document.getElementById('phone-input').value = savedPhone.replace(/^254/, '');
+  });
+
+  // Sanitize phone to full format  
+  function sanitizePhone(raw) {
+    raw = raw.trim().replace(/\s+/g, '');
+    if (raw.startsWith('0')) raw = '254' + raw.slice(1);
+    if (raw.startsWith('+254')) raw = raw.slice(1);
+    if (!raw.startsWith('254')) raw = '254' + raw;
+    return raw;
+  }
+
+  let pollInterval = null;
+  let pollCount = 0;
+
+  // ── Initiate payment ──
+  async function initiatePayment() {
+    const rawPhone = document.getElementById('phone-input').value.trim();
+    if (!rawPhone || rawPhone.length < 8) {
+      alert('Please enter a valid M-Pesa phone number.');
+      return;
+    }
+
+    const phone = sanitizePhone(rawPhone);
+    const userEmail = localStorage.getItem('userEmail') || '';
+
+    // Disable button + show loading state
+    const btn = document.getElementById('pay-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending STK Push...';
+
+    try {
+      const res = await fetch('http://localhost:5000/megapay/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, amount: 1300, userEmail })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Payment initiation failed.');
+      }
+
+      // Show pending screen
+      document.getElementById('phone-display').textContent = '+' + phone;
+      localStorage.setItem('userPhone', phone);
+      showView('pending');
+      startPolling(userEmail);
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock"></i> Pay Ksh 1,300 via M-Pesa';
+      document.getElementById('fail-message').textContent = err.message || 'Something went wrong. Please try again.';
+      showView('failed');
+    }
+  }
+
+  // ── Poll the server every 5s to check if payment confirmed ──
+  function startPolling(email) {
+    pollCount = 0;
+    clearInterval(pollInterval);
+
+    const countdownEl = document.getElementById('countdown-text');
+
+    pollInterval = setInterval(async () => {
+      pollCount++;
+      const remaining = Math.max(0, 120 - pollCount * 5);
+      countdownEl.textContent = `Auto-checking in ${remaining}s... (${pollCount}/24)`;
+
+      // Stop polling after 2 minutes
+      if (pollCount >= 24) {
+        clearInterval(pollInterval);
+        document.getElementById('fail-message').textContent = 'Payment confirmation timed out. If you paid, please contact support at complaints@emac.com';
+        showView('failed');
+        return;
+      }
+
+      try {
+        if (!email) {
+          // No email to poll — just show success after a reasonable wait (demo mode)
+          if (pollCount >= 4) { clearInterval(pollInterval); showView('success'); }
+          return;
+        }
+
+        const res = await fetch(`http://localhost:5000/megapay/status/${encodeURIComponent(email)}`);
+        const data = await res.json();
+
+        if (data.paymentStatus === 'paid') {
+          clearInterval(pollInterval);
+          showView('success');
+        }
+      } catch {
+        // Network issue — keep polling
+      }
+    }, 5000);
+  }
+</script>
+</body>
+</html>

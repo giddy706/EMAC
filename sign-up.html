@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>EMAC - Apply for a Loan</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --teal:#00A896; --teal-dark:#007A6C; --teal-light:#E0F5F3;
+      --gold:#F5A623; --text-dark:#1A2340; --text-mid:#4A5568; --text-light:#718096;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:#f5f7fa; min-height:100vh; }
+
+    /* ── Split layout ── */
+    .signup-wrap { display:flex; min-height:100vh; }
+
+    /* LEFT — brand panel */
+    .brand-panel {
+      background: linear-gradient(160deg, var(--teal) 0%, var(--teal-dark) 100%);
+      width: 42%;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      padding:60px 40px; color:#fff; position:relative; overflow:hidden;
+    }
+    .brand-panel::before {
+      content:''; position:absolute; width:300px; height:300px; border-radius:50%;
+      background:rgba(255,255,255,0.08); top:-80px; right:-80px;
+    }
+    .brand-panel::after {
+      content:''; position:absolute; width:200px; height:200px; border-radius:50%;
+      background:rgba(255,255,255,0.06); bottom:-60px; left:-60px;
+    }
+    .brand-panel .logo { font-size:32px; font-weight:900; color:#fff; margin-bottom:50px; z-index:1; }
+    .brand-panel .logo span { color:var(--gold); }
+    .brand-panel h2 { font-size:28px; font-weight:800; z-index:1; line-height:1.3; text-align:center; }
+    .brand-panel p { font-size:15px; opacity:0.8; margin-top:16px; text-align:center; z-index:1; line-height:1.7; }
+
+    /* Brand illustration */
+    .brand-illo { z-index:1; margin-bottom:36px; }
+    .info-pill {
+      z-index:1; background:rgba(255,255,255,0.15); border-radius:40px; padding:12px 22px;
+      display:flex; align-items:center; gap:12px; margin-top:30px; backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,0.2);
+    }
+    .info-pill .icon { font-size:20px; }
+    .info-pill .txt .t1 { font-size:12px; opacity:0.7; }
+    .info-pill .txt .t2 { font-size:14px; font-weight:700; }
+
+    /* RIGHT — form */
+    .form-panel {
+      flex:1; display:flex; flex-direction:column; justify-content:center;
+      padding:60px 50px; background:#fff;
+    }
+    .back-link { color:var(--text-mid); font-size:14px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-bottom:30px; }
+    .back-link:hover { color:var(--teal); }
+    .form-panel h1 { font-size:30px; font-weight:900; color:var(--text-dark); margin-bottom:6px; }
+    .form-panel .sub { font-size:14px; color:var(--text-light); margin-bottom:36px; }
+
+    /* Step indicator */
+    .steps { display:flex; align-items:center; gap:8px; margin-bottom:36px; }
+    .step { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+    .step.active { background:var(--teal); color:#fff; }
+    .step.done { background:var(--teal-light); color:var(--teal); }
+    .step.idle { background:#f0f0f0; color:var(--text-light); }
+    .step-label { font-size:11px; color:var(--text-light); font-weight:500; }
+    .step-divider { flex:1; height:2px; background:#f0f0f0; }
+
+    /* Section blocks */
+    .form-section-title { font-size:13px; font-weight:700; color:var(--teal); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:18px; margin-top:28px; }
+
+    /* Inputs */
+    .field-group { margin-bottom:20px; }
+    .field-group label { font-size:13px; font-weight:600; color:var(--text-mid); margin-bottom:6px; display:block; }
+    .field-input {
+      width:100%; height:50px; border:2px solid #eef0f5; border-radius:12px; padding:0 16px;
+      font-family:'Inter',sans-serif; font-size:14px; color:var(--text-dark);
+      background:#fafbfc; outline:none; transition:border 0.2s;
+    }
+    .field-input:focus { border-color:var(--teal); background:#fff; }
+    .input-icon-wrap { position:relative; }
+    .input-icon-wrap .field-input { padding-right:44px; }
+    .input-icon-wrap .eye-btn { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--text-light); cursor:pointer; background:none; border:none; font-size:16px; }
+
+    /* Age scroller style */
+    .age-scroller { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .age-col { flex:1; }
+    .age-col label { font-size:11px; color:var(--text-light); font-weight:600; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; }
+    .age-scroll-box {
+      border:2px solid #eef0f5; border-radius:12px; overflow:hidden; height:96px;
+      position:relative; background:#fafbfc; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .age-scroll-box::before, .age-scroll-box::after {
+      content:''; position:absolute; left:0; right:0; height:30px; pointer-events:none; z-index:2;
+    }
+    .age-scroll-box::before { top:0; background:linear-gradient(to bottom,#fafbfc,transparent); }
+    .age-scroll-box::after { bottom:0; background:linear-gradient(to top,#fafbfc,transparent); }
+    .age-scroll-inner { overflow-y:auto; height:100%; width:100%; text-align:center; scrollbar-width:none; cursor:ns-resize; }
+    .age-scroll-inner::-webkit-scrollbar { display:none; }
+    .age-item { height:32px; line-height:32px; font-size:15px; font-weight:500; color:var(--text-light); }
+    .age-item.selected { font-size:18px; font-weight:800; color:var(--text-dark); }
+    .age-highlight {
+      position:absolute; left:8px; right:8px; top:50%; transform:translateY(-50%);
+      height:36px; background:var(--teal-light); border-radius:8px; z-index:1; pointer-events:none;
+    }
+    .age-col + .age-col { margin-left:10px; }
+
+    /* Sex buttons */
+    .sex-row { display:flex; gap:12px; }
+    .sex-btn {
+      flex:1; height:56px; border-radius:14px; border:2px solid #eef0f5;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      cursor:pointer; font-size:11px; font-weight:600; color:var(--text-light);
+      transition:all 0.2s; background:#fafbfc;
+    }
+    .sex-btn i { font-size:20px; margin-bottom:3px; }
+    .sex-btn:hover, .sex-btn.active { border-color:var(--teal); background:var(--teal-light); color:var(--teal); }
+
+    /* Loan select */
+    .loan-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    .loan-opt {
+      border:2px solid #eef0f5; border-radius:12px; padding:12px 8px; text-align:center;
+      cursor:pointer; transition:all 0.2s; background:#fafbfc;
+    }
+    .loan-opt .amt { font-weight:900; font-size:16px; color:var(--text-dark); }
+    .loan-opt .int { font-size:11px; color:var(--text-light); margin-top:2px; }
+    .loan-opt:hover, .loan-opt.active { border-color:var(--teal); background:var(--teal-light); }
+    .loan-opt.active .amt { color:var(--teal); }
+
+    /* interest note */
+    .interest-note { background:#E0F5F3; border-radius:10px; padding:12px 16px; font-size:13px; color:var(--teal); display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+    .disclaimer { font-size:12px; color:#EF5350; font-weight:600; margin-bottom:20px; }
+
+    /* Submit */
+    .btn-next {
+      width:100%; background:var(--teal); color:#fff; border:none; border-radius:14px;
+      height:54px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif;
+      transition:background 0.2s, transform 0.2s; display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .btn-next:hover { background:var(--teal-dark); transform:translateY(-2px); }
+    .btn-next-sub { font-size:11px; opacity:0.7; display:block; }
+
+    .already-acc { text-align:center; margin-top:20px; font-size:14px; color:var(--text-light); }
+    .already-acc a { color:var(--teal); font-weight:600; text-decoration:none; }
+
+    @media(max-width:900px) { 
+      .brand-panel { display:none; } 
+      .form-panel { padding:40px 24px; }
+      .loan-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="signup-wrap">
+
+  <!-- Brand panel -->
+  <div class="brand-panel">
+    <div class="logo">EMAC <span>●</span></div>
+    <div class="brand-illo">
+      <svg viewBox="0 0 220 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:200px">
+        <rect x="30" y="70" width="160" height="110" rx="20" fill="rgba(255,255,255,0.15)"/>
+        <rect x="30" y="70" width="160" height="38" rx="20" fill="rgba(255,255,255,0.2)"/>
+        <rect x="130" y="90" width="60" height="50" rx="12" fill="rgba(255,255,255,0.12)"/>
+        <circle cx="160" cy="115" r="14" fill="rgba(255,255,255,0.25)"/>
+        <rect x="50" y="50" width="80" height="46" rx="8" fill="rgba(255,255,255,0.2)" transform="rotate(-10 50 50)"/>
+        <circle cx="70" cy="170" r="24" fill="#F5A623" opacity="0.85"/>
+        <circle cx="70" cy="170" r="17" fill="#FFB93E" opacity="0.9"/>
+        <text x="62" y="177" fill="#7A5A0A" font-size="16" font-weight="900">$</text>
+        <circle cx="160" cy="166" r="20" fill="#F5A623" opacity="0.85"/>
+        <circle cx="160" cy="166" r="14" fill="#FFB93E" opacity="0.9"/>
+        <text x="153" y="172" fill="#7A5A0A" font-size="14" font-weight="900">$</text>
+        <text x="20" y="45" fill="rgba(255,255,255,0.5)" font-size="18">★</text>
+        <text x="185" y="40" fill="#F5A623" font-size="14">★</text>
+        <text x="195" y="100" fill="rgba(255,255,255,0.4)" font-size="12">★</text>
+      </svg>
+    </div>
+    <h2>Meet your finance goals</h2>
+    <p>Apply for a loan and complete your financial readiness assessment in minutes.</p>
+    <div class="info-pill">
+      <div class="icon"><i class="fas fa-lock" style="color:#F5A623"></i></div>
+      <div class="txt">
+        <div class="t1">Registration Fee</div>
+        <div class="t2">Only Ksh 1,300 (Non-Refundable)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form panel -->
+  <div class="form-panel">
+    <a href="index.html" class="back-link"><i class="fas fa-chevron-left"></i> Back to Home</a>
+    <h1>Apply For Loan</h1>
+    <p class="sub">Fill in your details below to get started with your loan assessment.</p>
+
+    <!-- Steps -->
+    <div class="steps">
+      <div class="step active">1</div>
+      <div class="step-label" style="color:var(--teal);font-weight:700">Personal Info</div>
+      <div class="step-divider"></div>
+      <div class="step idle">2</div>
+      <div class="step-label">Loan Selection</div>
+      <div class="step-divider"></div>
+      <div class="step idle">3</div>
+      <div class="step-label">Payment</div>
+    </div>
+
+    <form id="signup-form">
+      <!-- Personal Info -->
+      <div class="form-section-title">Personal Info</div>
+
+      <div class="field-group">
+        <label for="signup-phone">Phone</label>
+        <input class="field-input" id="signup-phone" type="tel" placeholder="Enter Phone Number" required />
+      </div>
+      <div class="field-group">
+        <label for="signup-name">Full Name</label>
+        <input class="field-input" id="signup-name" type="text" placeholder="Enter Full Name" required />
+      </div>
+      <div class="field-group">
+        <label for="signup-email">Email Address</label>
+        <input class="field-input" id="signup-email" type="email" placeholder="Enter Email Address" required />
+      </div>
+      <div class="field-group">
+        <label for="password-field">Password</label>
+        <div class="input-icon-wrap">
+          <input class="field-input" id="password-field" type="password" placeholder="Create a Password" required />
+          <button type="button" class="eye-btn" onclick="togglePwd()"><i class="fas fa-eye" id="eye-icon"></i></button>
+        </div>
+      </div>
+
+      <!-- Age scroller -->
+      <div class="form-section-title">Age</div>
+      <div class="age-scroller">
+        <!-- Date -->
+        <div class="age-col">
+          <label>DATE</label>
+          <div class="age-scroll-box">
+            <div class="age-highlight"></div>
+            <div class="age-scroll-inner" id="scroll-date">
+              <!-- populated by JS -->
+            </div>
+          </div>
+        </div>
+        <!-- Month -->
+        <div class="age-col">
+          <label>MONTH</label>
+          <div class="age-scroll-box">
+            <div class="age-highlight"></div>
+            <div class="age-scroll-inner" id="scroll-month"></div>
+          </div>
+        </div>
+        <!-- Year -->
+        <div class="age-col">
+          <label>YEAR</label>
+          <div class="age-scroll-box">
+            <div class="age-highlight"></div>
+            <div class="age-scroll-inner" id="scroll-year"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sex -->
+      <div class="form-section-title">Sex</div>
+      <div class="sex-row mb-4">
+        <div class="sex-btn active" id="sex-m" onclick="selectSex('M')">
+          <i class="fas fa-mars"></i>
+          Male
+        </div>
+        <div class="sex-btn" id="sex-f" onclick="selectSex('F')">
+          <i class="fas fa-venus"></i>
+          Female
+        </div>
+      </div>
+
+      <!-- Loan Selection -->
+      <div class="form-section-title">Desired Loan Amount</div>
+      <div class="loan-grid" id="loan-grid">
+        <div class="loan-opt active" data-val="10000" onclick="selectLoan(this)">
+          <div class="amt">Ksh 10K</div>
+          <div class="int">1% / mo</div>
+        </div>
+        <div class="loan-opt" data-val="20000" onclick="selectLoan(this)">
+          <div class="amt">Ksh 20K</div>
+          <div class="int">1% / mo</div>
+        </div>
+        <div class="loan-opt" data-val="50000" onclick="selectLoan(this)">
+          <div class="amt">Ksh 50K</div>
+          <div class="int">1% / mo</div>
+        </div>
+        <div class="loan-opt" data-val="100000" onclick="selectLoan(this)">
+          <div class="amt">Ksh 100K</div>
+          <div class="int">1% / mo</div>
+        </div>
+        <div class="loan-opt" data-val="150000" onclick="selectLoan(this)">
+          <div class="amt">Ksh 150K</div>
+          <div class="int">1% / mo</div>
+        </div>
+      </div>
+      <input type="hidden" id="loan-amount" value="10000" />
+
+      <!-- Info -->
+      <div class="interest-note mt-3">
+        <i class="fas fa-info-circle"></i>
+        Interest Rate: <strong>1% per month</strong> – Simple, flat rate applied monthly.
+      </div>
+      <div class="disclaimer">* Registration fee of Ksh 1,300 is non-refundable.</div>
+
+      <button type="submit" class="btn-next">
+        <span>Next</span>
+        <small class="btn-next-sub">Professional Info</small>
+      </button>
+    </form>
+
+    <div class="already-acc">Already have an account? <a href="#">Sign In</a></div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+  // ── Age Scrollers ──
+  function buildScroller(id, items, defaultIdx) {
+    const el = document.getElementById(id);
+    const pad = '<div class="age-item" style="height:32px"></div>';
+    el.innerHTML = pad + pad;
+    items.forEach((v, i) => {
+      const d = document.createElement('div');
+      d.className = 'age-item' + (i === defaultIdx ? ' selected' : '');
+      d.textContent = v;
+      el.appendChild(d);
+    });
+    el.innerHTML += pad + pad;
+    const itemH = 32;
+    el.scrollTop = defaultIdx * itemH;
+    el.addEventListener('scroll', () => {
+      const idx = Math.round(el.scrollTop / itemH);
+      el.querySelectorAll('.age-item').forEach((d, i) => {
+        d.classList.toggle('selected', i - 2 === idx);
+      });
+    });
+  }
+
+  const days = Array.from({length:31}, (_,i) => String(i+1).padStart(2,'0'));
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({length:60}, (_,i) => String(currentYear - 18 - i));
+
+  buildScroller('scroll-date', days, 11);
+  buildScroller('scroll-month', months, 1);
+  buildScroller('scroll-year', years, 0);
+
+  // ── Sex ──
+  let selectedSex = 'M';
+  function selectSex(s) {
+    selectedSex = s;
+    document.getElementById('sex-m').classList.toggle('active', s==='M');
+    document.getElementById('sex-f').classList.toggle('active', s==='F');
+  }
+
+  // ── Loan grid ──
+  function selectLoan(el) {
+    document.querySelectorAll('.loan-opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('loan-amount').value = el.dataset.val;
+  }
+
+  // ── Password toggle ──
+  function togglePwd() {
+    const f = document.getElementById('password-field');
+    const i = document.getElementById('eye-icon');
+    if (f.type === 'password') { f.type = 'text'; i.className = 'fas fa-eye-slash'; }
+    else { f.type = 'password'; i.className = 'fas fa-eye'; }
+  }
+
+  // ── Form submit ──
+  document.getElementById('signup-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const userData = {
+      name: document.getElementById('signup-name').value,
+      phone: document.getElementById('signup-phone').value,
+      email: document.getElementById('signup-email').value,
+      password: document.getElementById('password-field').value,
+      sex: selectedSex,
+      loanAmount: document.getElementById('loan-amount').value,
+      paymentStatus: 'pending'
+    };
+    fetch('http://localhost:5000/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    })
+    .then(r => r.json())
+    .then(() => {
+      localStorage.setItem('userEmail', userData.email);
+      localStorage.setItem('loanAmount', userData.loanAmount);
+      window.location.href = 'payment.html';
+    })
+    .catch(() => {
+      // fallback for offline/demo
+      localStorage.setItem('userEmail', userData.email);
+      localStorage.setItem('loanAmount', userData.loanAmount);
+      window.location.href = 'payment.html';
+    });
+  });
+</script>
+</body>
+</html>

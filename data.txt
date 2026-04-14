@@ -1,0 +1,18 @@
+the website should be called EMAC 
+Website Pages Structure
+Home (trust-focused)
+Sign Up / Pay (Ksh 650)
+Dashboard
+CRB Help Tool (Ksh 100)
+Learn (courses)
+Support
+when signing up the person should pay a regestration fee of ksh650
+after paying the 650 this is what users get:
+Personal financial dashboard
+Access to training content
+Credit improvement roadmap
+Budget tools
+the website should be secure and user friendly also everthing should be in english
+also there should not be any plan subscription you only access the website when you have paid the 650 
+Add disclaimer:
+“EMAC is not a credit reference bureau. We assist users in accessing and understanding their credit reports.”
