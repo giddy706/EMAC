@@ -12,6 +12,10 @@ app.use(cors());
 const USERS_FILE = path.join(__dirname, 'users.json');
 const TRAFFIC_FILE = path.join(__dirname, 'traffic.json');
 
+// Payment Environment Configuration
+const IS_PROD = process.env.PAYMENT_ENV === 'production';
+const MPESA_URL = IS_PROD ? process.env.MPESA_PROD_URL : process.env.MPESA_SANDBOX_URL;
+
 // Helper to read users
 function readUsers() {
   try {
@@ -171,7 +175,7 @@ async function getMpesaToken() {
   ).toString('base64');
 
   const res = await axios.get(
-    'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
+    `${MPESA_URL}/oauth/v1/generate?grant_type=client_credentials`,
     {
       headers: { Authorization: `Basic ${auth}` }
     }
@@ -199,7 +203,7 @@ app.post('/mpesa/pay', async (req, res) => {
     ).toString('base64');
 
     const response = await axios.post(
-      'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest',
+      `${MPESA_URL}/mpesa/stkpush/v1/processrequest`,
       {
         BusinessShortCode: process.env.MPESA_SHORTCODE,
         Password: password,
@@ -310,5 +314,9 @@ app.get('/api/admin/applications', (req, res) => {
 // ===============================
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log('-------------------------------------------');
+  console.log(`🚀 Server running on port ${port}`);
+  console.log(`🌐 Mode: ${IS_PROD ? 'PRODUCTION (LIVE)' : 'SANDBOX (TEST)'}`);
+  console.log(`🔗 M-Pesa URL: ${MPESA_URL}`);
+  console.log('-------------------------------------------');
 });
