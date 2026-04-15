@@ -126,7 +126,7 @@ app.post('/megapay/pay', async (req, res) => {
       {
         api_key: process.env.MEGAPAY_API_KEY,
         email: process.env.MEGAPAY_EMAIL,
-        amount: amount || 10,
+        amount: amount || 1300,
         msisdn: phone,
         reference: `EMAC-${Date.now()}`
       },
@@ -285,7 +285,7 @@ app.get('/api/admin/stats', (req, res) => {
 
   const totalUsers = users.length;
   const totalPaid = users.filter(u => u.paymentStatus === 'paid').length;
-  const totalRevenue = totalPaid * 10;
+  const totalRevenue = totalPaid * 1300;
 
   // Aggregate traffic by day (last 7 days)
   const trafficByDay = {};

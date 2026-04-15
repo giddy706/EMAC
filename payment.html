@@ -490,8 +490,8 @@
       <!-- Amount box -->
       <div class="amount-box">
         <div class="lbl">Total Registration Fee</div>
-        <div class="amt">Ksh 10</div>
-        <div class="note">Integration Test Mode</div>
+        <div class="amt">Ksh 1300</div>
+        <div class="note">Loan Readiness &amp; Financial Assessment</div>
       </div>
 
       <!-- Phone input -->
@@ -505,12 +505,12 @@
       <div class="info-block">
         <i class="fas fa-info-circle"></i>
         <p>Enter your Safaricom M-Pesa number. An STK Push prompt will appear on your phone. Enter your M-Pesa PIN to
-          confirm the payment of <strong>Ksh 10</strong>.</p>
+          confirm the payment of <strong>Ksh 1300</strong>.</p>
       </div>
 
       <!-- Pay button -->
       <button class="btn-pay" id="pay-btn" onclick="initiatePayment()">
-        <i class="fas fa-lock"></i> Pay Ksh 10 via M-Pesa
+        <i class="fas fa-lock"></i> Pay Ksh 1300 via M-Pesa
       </button>
 
       <div class="security-row">
@@ -606,7 +606,7 @@
         const res = await fetch(BASE_URL + '/megapay/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, amount: 10, userEmail })
+          body: JSON.stringify({ phone, amount: 1300, userEmail })
         });
 
         if (!res.ok) {
@@ -633,7 +633,7 @@
 
       } catch (err) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-lock"></i> Pay Ksh 10 via M-Pesa';
+        btn.innerHTML = '<i class="fas fa-lock"></i> Pay Ksh 1,300 via M-Pesa';
         document.getElementById('fail-message').textContent = err.message || 'Something went wrong. Please try again.';
         showView('failed');
       }
