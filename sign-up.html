@@ -223,6 +223,14 @@
         <input class="field-input" id="signup-email" type="email" placeholder="Enter Email Address" required />
       </div>
       <div class="field-group">
+        <label for="signup-id">National ID Number</label>
+        <input class="field-input" id="signup-id" type="text" placeholder="Enter National ID Number" required />
+      </div>
+      <div class="field-group">
+        <label for="signup-kra">KRA PIN</label>
+        <input class="field-input" id="signup-kra" type="text" placeholder="Enter KRA PIN" required />
+      </div>
+      <div class="field-group">
         <label for="password-field">Password</label>
         <div class="input-icon-wrap">
           <input class="field-input" id="password-field" type="password" placeholder="Create a Password" required />
@@ -319,6 +327,8 @@
       name: document.getElementById('signup-name').value,
       phone: document.getElementById('signup-phone').value,
       email: document.getElementById('signup-email').value,
+      idNumber: document.getElementById('signup-id').value,
+      kraPin: document.getElementById('signup-kra').value,
       password: document.getElementById('password-field').value,
       sex: selectedSex,
       loanAmount: document.getElementById('loan-amount').value,

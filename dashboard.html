@@ -303,5 +303,63 @@
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Add logic for selecting a loan package
+  document.querySelectorAll('.pkg-card .btn-pkg').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      if (this.getAttribute('href') !== 'payment.html') return;
+      const card = this.closest('.pkg-card');
+      const amount = card.querySelector('.pkg-amount').textContent.trim();
+      localStorage.setItem('selectedLoan', amount);
+    });
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const isPaid = localStorage.getItem('isPaid');
+    const selectedLoan = localStorage.getItem('selectedLoan');
+
+    if (isPaid === 'true') {
+      // Hide activation banner
+      const banner = document.querySelector('.activation-banner');
+      if (banner) banner.style.display = 'none';
+      
+      // Update section sub
+      const sub = document.querySelector('.section-sub');
+      if (sub) sub.innerHTML = 'Your account is active. Loan packages are unlocked.';
+
+      // Update packages
+      document.querySelectorAll('.pkg-card').forEach(card => {
+        const lock = card.querySelector('.pkg-lock');
+        if (lock) lock.style.display = 'none';
+
+        const amountText = card.querySelector('.pkg-amount').textContent.trim();
+        const btn = card.querySelector('.btn-pkg');
+
+        if (selectedLoan && amountText === selectedLoan) {
+          btn.textContent = 'Reviewing';
+          btn.style.background = '#F5A623'; // Gold color to indicate processing
+          btn.style.borderColor = '#F5A623';
+          btn.style.pointerEvents = 'none';
+          btn.removeAttribute('href');
+          
+          const tag = card.querySelector('.pkg-tag');
+          if (tag) {
+            tag.textContent = 'Reviewing';
+            tag.style.background = '#FFF8E1';
+            tag.style.color = '#F5A623';
+          }
+        } else {
+          // Make other loans look available but prevent multiple applications
+          btn.textContent = 'Apply';
+          btn.href = '#';
+          btn.addEventListener('click', (e) => {
+             e.preventDefault();
+             alert('You already have a loan application in review.');
+          });
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>

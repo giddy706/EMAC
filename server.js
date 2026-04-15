@@ -31,7 +31,7 @@ function saveUsers(users) {
 // 1. REGISTER USER
 // ===============================
 app.post('/api/register', (req, res) => {
-  const { name, email, password, loanAmount } = req.body;
+  const { name, email, password, loanAmount, idNumber, kraPin } = req.body;
   const users = readUsers();
 
   if (users.find(u => u.email === email)) {
@@ -42,6 +42,8 @@ app.post('/api/register', (req, res) => {
     name,
     email,
     password, // In production, hash this!
+    idNumber,
+    kraPin,
     loanAmount,
     paymentStatus: 'pending',
     createdAt: new Date().toISOString()
