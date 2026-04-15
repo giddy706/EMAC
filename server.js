@@ -126,14 +126,20 @@ app.post('/megapay/pay', async (req, res) => {
       {
         api_key: process.env.MEGAPAY_API_KEY,
         email: process.env.MEGAPAY_EMAIL,
-        amount: amount || 1300,
+        amount: amount || 10,
         msisdn: phone,
         reference: `EMAC-${Date.now()}`
       },
       {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
       }
     );
+
+    console.log(`[MEGAPAY] STK Push initiated for ${phone}. Amount: ${amount || 10}`);
+    console.log('[MEGAPAY] Response Data:', JSON.stringify(response.data, null, 2));
 
     // Store the checkout request ID against this user so we can verify later
     if (userEmail && response.data) {
@@ -143,15 +149,16 @@ app.post('/megapay/pay', async (req, res) => {
         user.checkoutRequestId = response.data.CheckoutRequestID || response.data.checkout_request_id;
         user.paymentStatus = 'awaiting';
         saveUsers(users);
+        console.log(`[MEGAPAY] CheckoutRequestID tracked for ${userEmail}`);
       }
     }
 
     res.json({ success: true, data: response.data });
   } catch (err) {
+    console.error('[MEGAPAY] ERROR:', err.response ? JSON.stringify(err.response.data, null, 2) : err.message);
     const errorMsg = err.response && err.response.data && err.response.data.errorMessage 
       ? err.response.data.errorMessage 
       : err.message;
-    console.error('MegaPay Error:', err.response ? err.response.data : err.message);
     res.status(500).json({ error: errorMsg });
   }
 });
@@ -278,7 +285,7 @@ app.get('/api/admin/stats', (req, res) => {
 
   const totalUsers = users.length;
   const totalPaid = users.filter(u => u.paymentStatus === 'paid').length;
-  const totalRevenue = totalPaid * 1300;
+  const totalRevenue = totalPaid * 10;
 
   // Aggregate traffic by day (last 7 days)
   const trafficByDay = {};
