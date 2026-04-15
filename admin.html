@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>EMAC Admin - Dashboard</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --dark-bg: #0F172A;
+      --card-bg: #1E293B;
+      --accent: #00A896;
+      --accent-dim: rgba(0, 168, 150, 0.1);
+      --gold: #F5A623;
+      --text-main: #F8FAFC;
+      --text-dim: #94A3B8;
+      --border: #334155;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-main);
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    /* ── Login Overlay ── */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--dark-bg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .login-box h2 { font-weight: 800; margin-bottom: 8px; }
+    .login-box p { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; }
+    .login-input {
+      width: 100%;
+      background: #0F172A;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      margin-bottom: 16px;
+      outline: none;
+    }
+    .login-input:focus { border-color: var(--accent); }
+    .login-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── Main Layout ── */
+    #dashboard-content { display: none; padding-top: 20px; }
+    .sidebar {
+      height: 100vh;
+      width: 260px;
+      position: fixed;
+      top: 0; left: 0;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      padding: 30px 20px;
+      z-index: 100;
+    }
+    .main-canvas { margin-left: 260px; padding: 40px; }
+
+    .nav-head { font-size: 20px; font-weight: 900; color: var(--accent); margin-bottom: 40px; }
+    .nav-head span { color: var(--gold); }
+    
+    .nav-item-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-dim);
+      text-decoration: none !important;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .nav-item-link:hover, .nav-item-link.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* ── Cards ── */
+    .stat-card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      height: 100%;
+    }
+    .stat-card .label { color: var(--text-dim); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card .val { font-size: 28px; font-weight: 800; margin: 8px 0; }
+    .stat-card .trend { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .trend.up { color: #10B981; }
+
+    /* ── Charts & Tables ── */
+    .panel {
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 30px;
+    }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .panel-title { font-size: 18px; font-weight: 700; margin: 0; }
+
+    table { width: 100%; color: var(--text-main); }
+    th { color: var(--text-dim); font-size: 12px; font-weight: 600; text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--border); }
+    td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-paid { background: #05966920; color: #10B981; }
+    .badge-pending { background: #D9770620; color: #F59E0B; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-canvas { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Section -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <h2>Admin Login</h2>
+      <p>Please enter the administrator password</p>
+      <input type="password" id="admin-pwd" class="login-input" placeholder="Password" />
+      <button class="login-btn" onclick="login()">Access Dashboard</button>
+      <p id="error-msg" class="mt-3 text-danger" style="display:none">Invalid Password</p>
+    </div>
+  </div>
+
+  <!-- Dashboard Section -->
+  <div id="dashboard-content">
+    <div class="sidebar">
+      <div class="nav-head">EMAC <span>●</span></div>
+      <a href="#" class="nav-item-link active"><i class="fas fa-chart-pie"></i> Overview</a>
+      <a href="#" class="nav-item-link"><i class="fas fa-users"></i> Applications</a>
+      <a href="#" class="nav-item-link"><i class="fas fa-globe"></i> Traffic</a>
+      <div style="margin-top:auto">
+        <a href="#" class="nav-item-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+
+    <div class="main-canvas">
+      <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1>Dashboard Overview</h1>
+        <div class="text-dim" id="last-updated">Updating...</div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="row mb-5">
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="label">Total Applications</div>
+            <div class="val" id="stat-users">0</div>
+            <div class="trend up"><i class="fas fa-arrow-up"></i> Live Tracking</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="label">Conversion (Paid)</div>
+            <div class="val" id="stat-paid">0</div>
+            <div class="trend up"><i class="fas fa-check"></i> Quality Users</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="label">Total Revenue</div>
+            <div class="val" id="stat-revenue">Ksh 0</div>
+            <div class="trend up"><i class="fas fa-coins"></i> Gross Earnings</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card">
+            <div class="label">Total Traffic</div>
+            <div class="val" id="stat-visits">0</div>
+            <div class="trend"><i class="fas fa-eye"></i> Unique Hits</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title">Visitor Activity (Last 7 Days)</h3>
+              <i class="fas fa-chart-line text-dim"></i>
+            </div>
+            <div style="height: 300px;">
+              <canvas id="trafficChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="panel">
+            <div class="panel-head">
+              <h3 class="panel-title">Traffic by Location</h3>
+              <i class="fas fa-map-marker-alt text-dim"></i>
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+              <table id="location-table">
+                <thead><tr><th>Location</th><th>Hits</th></tr></thead>
+                <tbody>
+                  <!-- Filled by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applications Table -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3 class="panel-title">Recent Loan Applications</h3>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="fetchData()">Refresh</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table id="apps-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>ID Number</th>
+                <th>KRA PIN</th>
+                <th>Loan Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    let trafficChart;
+
+    async function login() {
+      const password = $('#admin-pwd').val();
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('adminToken', data.token);
+          showDashboard();
+        } else {
+          $('#error-msg').show();
+        }
+      } catch (e) {
+        $('#error-msg').text('Server error.').show();
+      }
+    }
+
+    function showDashboard() {
+      $('#login-overlay').fadeOut();
+      $('#dashboard-content').fadeIn();
+      fetchData();
+      setInterval(fetchData, 60000); // Auto refresh every minute
+    }
+
+    function logout() {
+      localStorage.removeItem('adminToken');
+      location.reload();
+    }
+
+    async function fetchData() {
+      try {
+        const [statsRes, appsRes] = await Promise.all([
+          fetch('/api/admin/stats'),
+          fetch('/api/admin/applications')
+        ]);
+        
+        const stats = await statsRes.json();
+        const apps = await appsRes.json();
+
+        // Update Stats
+        $('#stat-users').text(stats.totalUsers);
+        $('#stat-paid').text(stats.totalPaid);
+        $('#stat-revenue').text('Ksh ' + stats.totalRevenue.toLocaleString());
+        $('#stat-visits').text(stats.totalVisits);
+        $('#last-updated').text('Last update: ' + new Date().toLocaleTimeString());
+
+        // Update Charts
+        updateCharts(stats.trafficByDay);
+        updateLocationTable(stats.locationStats);
+
+        // Update Apps Table
+        updateAppsTable(apps);
+
+      } catch (e) {
+        console.error('Data fetch error:', e);
+      }
+    }
+
+    function updateCharts(data) {
+      const labels = Object.keys(data).sort();
+      const values = labels.map(l => data[l]);
+
+      if (trafficChart) { trafficChart.destroy(); }
+      const ctx = document.getElementById('trafficChart').getContext('2d');
+      trafficChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Page Views',
+            data: values,
+            borderColor: '#00A896',
+            backgroundColor: 'rgba(0, 168, 150, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 6,
+            pointBackgroundColor: '#00A896'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: '#334155' }, ticks: { color: '#94A3B8' } },
+            x: { grid: { display: false }, ticks: { color: '#94A3B8' } }
+          }
+        }
+      });
+    }
+
+    function updateLocationTable(data) {
+      const tbody = $('#location-table tbody');
+      tbody.empty();
+      const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
+      sorted.forEach(([loc, count]) => {
+        tbody.append(`<tr><td>${loc}</td><td><strong>${count}</strong></td></tr>`);
+      });
+    }
+
+    function updateAppsTable(apps) {
+      const tbody = $('#apps-table tbody');
+      tbody.empty();
+      apps.forEach(app => {
+        const date = new Date(app.createdAt).toLocaleDateString();
+        const statusBadge = app.paymentStatus === 'paid' ? 'badge-paid' : 'badge-pending';
+        tbody.append(`
+          <tr>
+            <td>${date}</td>
+            <td style="font-weight:700">${app.name}</td>
+            <td>${app.email}</td>
+            <td>${app.idNumber || 'N/A'}</td>
+            <td>${app.kraPin || 'N/A'}</td>
+            <td>Ksh ${parseInt(app.loanAmount).toLocaleString()}</td>
+            <td><span class="badge-status ${statusBadge}">${app.paymentStatus.toUpperCase()}</span></td>
+          </tr>
+        `);
+      });
+    }
+
+    // Check auth on load
+    if (localStorage.getItem('adminToken')) {
+      showDashboard();
+    }
+  </script>
+</body>
+</html>

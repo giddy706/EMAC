@@ -8,9 +8,9 @@ const path = require('path');
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static(path.join(__dirname)));
 
 const USERS_FILE = path.join(__dirname, 'users.json');
+const TRAFFIC_FILE = path.join(__dirname, 'traffic.json');
 
 // Helper to read users
 function readUsers() {
@@ -26,6 +26,62 @@ function readUsers() {
 function saveUsers(users) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
+
+// Helper to read traffic
+function readTraffic() {
+  try {
+    const data = fs.readFileSync(TRAFFIC_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    return [];
+  }
+}
+
+// Helper to save traffic
+function saveTraffic(traffic) {
+  fs.writeFileSync(TRAFFIC_FILE, JSON.stringify(traffic, null, 2));
+}
+
+// ===============================
+// 0. TRAFFIC LOGGING MIDDLEWARE
+// ===============================
+app.use(async (req, res, next) => {
+  // Only log page views (HTML files or root)
+  if (req.method === 'GET' && (req.path === '/' || req.path.endsWith('.html')) && !req.path.includes('admin')) {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const traffic = readTraffic();
+    
+    // Simple deduplication: don't log the same IP for the same path in the last 5 minutes
+    const now = new Date();
+    const fiveMinsAgo = new Date(now.getTime() - 5 * 60 * 1000);
+    const recentVisit = traffic.find(v => v.ip === ip && v.path === req.path && new Date(v.timestamp) > fiveMinsAgo);
+
+    if (!recentVisit) {
+      let location = 'Unknown';
+      try {
+        // Simple GeoIP lookup (ip-api.com)
+        // Note: In local dev, this might return 'Reserved' for localhost IPs
+        const geoRes = await axios.get(`http://ip-api.com/json/${ip.split(',')[0]}`);
+        if (geoRes.data && geoRes.data.status === 'success') {
+          location = `${geoRes.data.city}, ${geoRes.data.country}`;
+        }
+      } catch (e) {
+        // Silent fail for geoip
+      }
+
+      traffic.push({
+        timestamp: now.toISOString(),
+        path: req.path,
+        ip: ip,
+        location: location
+      });
+      saveTraffic(traffic);
+    }
+  }
+  next();
+});
+
+app.use(express.static(path.join(__dirname)));
 
 // ===============================
 // 1. REGISTER USER
@@ -198,7 +254,59 @@ app.post('/callback', (req, res) => {
 });
 
 // ===============================
-// 8. START SERVER
+// 8. ADMIN API
+// ===============================
+
+// Admin Login
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.ADMIN_PASSWORD) {
+    res.json({ success: true, token: 'fake-admin-token-' + Date.now() });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid password' });
+  }
+});
+
+// Admin Stats
+app.get('/api/admin/stats', (req, res) => {
+  const users = readUsers();
+  const traffic = readTraffic();
+
+  const totalUsers = users.length;
+  const totalPaid = users.filter(u => u.paymentStatus === 'paid').length;
+  const totalRevenue = totalPaid * 1300;
+
+  // Aggregate traffic by day (last 7 days)
+  const trafficByDay = {};
+  const locationStats = {};
+
+  traffic.forEach(entry => {
+    const day = entry.timestamp.split('T')[0];
+    trafficByDay[day] = (trafficByDay[day] || 0) + 1;
+
+    const loc = entry.location || 'Unknown';
+    locationStats[loc] = (locationStats[loc] || 0) + 1;
+  });
+
+  res.json({
+    totalUsers,
+    totalPaid,
+    totalRevenue,
+    totalVisits: traffic.length,
+    trafficByDay,
+    locationStats
+  });
+});
+
+// Admin Applications (Users)
+app.get('/api/admin/applications', (req, res) => {
+  const users = readUsers();
+  // Return users sorted by newest first
+  res.json(users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+});
+
+// ===============================
+// 9. START SERVER
 // ===============================
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": "2026-04-15T09:25:20.167Z",
+    "path": "/index.html",
+    "ip": "::1",
+    "location": "Unknown"
+  },
+  {
+    "timestamp": "2026-04-15T09:31:15.345Z",
+    "path": "/index.html",
+    "ip": "::1",
+    "location": "Unknown"
+  }
+]
